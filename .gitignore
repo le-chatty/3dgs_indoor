@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Compiled C extensions
+*.so
+*.pyd
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Scene / training data (usually too large for git)
+input/
+images/
+images_2/
+images_4/
+images_8/
+sparse/
+distorted/
+stereo/
+*.ply
+*.pth
+output/
+output_*/
+
+# Tensorboard
+runs/
+
+# Logs
+*.log
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*~
+
+# OS
+.DS_Store
+Thumbs.db

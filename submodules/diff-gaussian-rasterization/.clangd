@@ -1,0 +1,28 @@
+CompileFlags:
+  Add:
+    - -std=c++17
+    - -x
+    - cuda
+    - --cuda-gpu-arch=sm_86
+    - --cuda-path=/data/group2/miniconda3/envs/gs
+    - -I/usr/lib/gcc/x86_64-linux-gnu/11/include
+    - -I/usr/include/c++/11
+    - -I/data/group2/miniconda3/pkgs/cuda-cccl_linux-64-12.8.90-ha770c72_1/targets/x86_64-linux/include
+    - -I/data/group2/miniconda3/pkgs/cuda-crt-dev_linux-64-12.8.93-ha770c72_3/targets/x86_64-linux/include
+    - -I/data/group2/miniconda3/pkgs/cuda-cudart-dev_linux-64-12.8.90-h3f2d84a_1/targets/x86_64-linux/include
+    - -I/data/group2/gaussian-splatting/submodules/diff-gaussian-rasterization/third_party/glm
+  Remove: 
+    # - --diag_suppress=*
+    - --generate-code=*
+    - -gencode=*
+    - -forward-unknown-to-host-compiler
+    - -Xcompiler
+    # - -Xcudafe
+    - --options-file
+    - --compiler-options
+    # - --use_fast_math
+    # - --expt-relaxed-constexpr
+
+Diagnostics:
+  Suppress:
+    - expected_expression
