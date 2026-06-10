@@ -6,14 +6,35 @@
 
 https://github.com/le-chatty/3dgs_indoor/raw/main/anjia.mp4
 
-## 主要改动
+## 文件说明
+
+### 数据预处理
+
+| 文件 | 输入 | 说明 |
+|------|------|------|
+| `split.py` | Insta360 `.insv` 双镜头视频 | 抽帧 + 圆形 mask 裁切鱼眼区域 |
+| `convert.py` | `input/` 鱼眼图像 | COLMAP 流程，写死 `OPENCV_FISHEYE` 内参 `(920,920,1472,1440)` |
+| `convert_erp14.py` | `erp_frames/*.jpg` ERP 全景图 | 每帧展开为 14 路 pinhole 视角后跑 COLMAP；输出与 `convert.py` 相同，可直接用 `train.py` 训练 |
+
+### 训练
 
 | 文件 | 说明 |
 |------|------|
-| `split.py` | Insta360 `.insv` 双镜头抽帧，圆形 mask 裁切鱼眼区域 |
-| `convert.py` | COLMAP 鱼眼流程，写死 `OPENCV_FISHEYE` 内参 `(920,920,1472,1440)` |
-| `train.py` | 加入 RobustNeRF 动态 mask，过滤高误差瞬态像素；depth loss 也随 mask 加权 |
-| `gaussian_renderer/__init__.py` | 兼容旧版 rasterizer（不支持 `antialiasing`，仅返回 `(image, radii)`） |
+| `train.py` | RobustNeRF 动态 mask：iter > 1000 后过滤误差最高的 5% 像素，L1 loss 和 depth loss 均随 mask 加权 |
+
+### 渲染
+
+| 文件 | 说明 |
+|------|------|
+| `render_ellipse_traj.py` | 沿椭圆轨迹渲染漫游视频（轨迹算法移植自 RT-Splatting） |
+| `render_pannini.py` | Pannini 投影渲染，适合 ERP 场景（宽视角不变形） |
+| `render_pannini_fisheye.py` | 同上，默认不过滤相机名，适合鱼眼场景 |
+
+### 底层修改
+
+| 文件 | 说明 |
+|------|------|
+| `gaussian_renderer/__init__.py` | 兼容旧版 rasterizer（不支持 `antialiasing`，depth 返回可选） |
 | `scene/dataset_readers.py` | 支持 `OPENCV_FISHEYE` 等畸变模型；修复符号链接图像的 depth 路径拼接 bug |
 
 ## 安装
@@ -31,6 +52,53 @@ conda activate gaussian_splatting
 pip install -e submodules/diff-gaussian-rasterization
 pip install -e submodules/simple-knn
 pip install -e submodules/fused-ssim
+
+# 4. ERP 流程额外依赖
+pip install py360convert
+```
+
+## 使用流程：ERP 全景视频
+
+ERP 原始视频不含在仓库中，需自行抽帧后放入 `erp_frames/`。
+
+```bash
+# Step 1: 将 ERP 全景图展开为 14 路 pinhole（每帧 6×60° + 4×90°×2 ring）
+# 并跑 COLMAP 重建
+python convert_erp14.py -s /path/to/SCENE
+
+# Step 2: 训练（与鱼眼流程相同）
+python train.py \
+  -s /path/to/SCENE \
+  -m /path/to/SCENE/output_model \
+  --exposure_lr_init 0.001 \
+  --exposure_lr_final 0.0001 \
+  --exposure_lr_delay_steps 5000 \
+  --exposure_lr_delay_mult 0.001 \
+  --train_test_exp \
+  --disable_viewer
+```
+
+场景目录结构：
+
+```
+SCENE/
+└── erp_frames/
+    ├── 00000.jpg   ← ERP 全景帧
+    ├── 00001.jpg
+    └── ...
+```
+
+## 渲染
+
+```bash
+# 椭圆轨迹漫游视频
+python render_ellipse_traj.py --model_dir /path/to/SCENE/output_model --iteration 30000
+
+# Pannini 投影（鱼眼场景）
+python render_pannini_fisheye.py --model_dir /path/to/SCENE/output_model --iteration 30000
+
+# Pannini 投影（ERP 场景）
+python render_pannini.py --model_dir /path/to/SCENE/output_model --iteration 30000
 ```
 
 ## 数据集
