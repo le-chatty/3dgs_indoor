@@ -2,6 +2,10 @@
 
 基于 [3D Gaussian Splatting](https://github.com/graphdeco-inria/gaussian-splatting) 的室内场景重建流程，适配 **Insta360 双镜头鱼眼相机**，并加入 **RobustNeRF Masking** 抑制瞬态干扰（镜子反射、拍摄者入画等）。
 
+## Demo
+
+https://github.com/le-chatty/3dgs_indoor/raw/main/anjia.mp4
+
 ## 主要改动
 
 | 文件 | 说明 |
@@ -29,15 +33,34 @@ pip install -e submodules/simple-knn
 pip install -e submodules/fused-ssim
 ```
 
+## 数据集
+
+仓库附带 3 个室内场景的原始视频（Insta360 双镜头 `.insv` 格式）：
+
+```
+data/indoor/
+├── indoor1/
+│   ├── indoor10.insv   ← 前镜头
+│   └── indoor11.insv   ← 后镜头
+├── indoor2/
+│   ├── indoor20.insv
+│   └── indoor21.insv
+└── indoor3/
+    ├── indoor30.insv
+    └── indoor31.insv
+```
+
+命名规则：`indoorX0.insv` = 前镜头，`indoorX1.insv` = 后镜头。
+
 ## 使用流程
 
 ```bash
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
-# Step 1: 从 Insta360 双视频中抽帧
+# Step 1: 从 Insta360 双视频中抽帧（以 indoor3 为例）
 python split.py \
-  -f /path/to/front.insv \
-  -b /path/to/back.insv \
+  -f data/indoor/indoor3/indoor30.insv \
+  -b data/indoor/indoor3/indoor31.insv \
   -o /path/to/SCENE/input
 
 # Step 2: COLMAP 鱼眼重建（生成 sparse 点云 + 去畸变图像）
