@@ -1,7 +1,9 @@
 # 3DGS Indoor — 鱼眼全景室内重建
 
 基于 [3D Gaussian Splatting](https://github.com/graphdeco-inria/gaussian-splatting) 的室内场景重建流程，适配 **Insta360 双镜头鱼眼相机**，并加入 **RobustNeRF Masking** 抑制瞬态干扰（镜子反射、拍摄者入画等）。
+This submodule contains a set of improvements and enhancements that are not used in the main project.
 
+These changes were developed as potential upgrades or experimental features, but they have not been integrated into the core codebase. They are kept here for reference, testing, or future consideration. Use them with the understanding that they are not required for the main project's functionality.
 ## Demo
 
 https://github.com/le-chatty/3dgs_indoor/raw/main/anjia.mp4
@@ -108,8 +110,8 @@ python render_pannini.py --model_dir /path/to/SCENE/output_model --iteration 300
 ```
 data/indoor/
 ├── indoor1/
-│   ├── indoor10.insv   ← 前镜头
-│   └── indoor11.insv   ← 后镜头
+│   ├── indoor10.insv   ← 后镜头
+│   └── indoor11.insv   ← 前镜头
 ├── indoor2/
 │   ├── indoor20.insv
 │   └── indoor21.insv
@@ -118,7 +120,7 @@ data/indoor/
     └── indoor31.insv
 ```
 
-命名规则：`indoorX0.insv` = 前镜头，`indoorX1.insv` = 后镜头。
+命名规则：`indoorX0.insv` = 后镜头，`indoorX1.insv` = 前镜头, 注意视频上下颠倒
 
 ## 使用流程
 
